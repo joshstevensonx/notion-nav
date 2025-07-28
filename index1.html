@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales & Marketing Knowledge Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .quiz-option.correct {
+            background-color: #d1fae5; /* Green-100 */
+            border-color: #10b981; /* Green-500 */
+        }
+        .quiz-option.incorrect {
+            background-color: #fee2e2; /* Red-100 */
+            border-color: #ef4444; /* Red-500 */
+        }
+        .correct-answer-text {
+            color: #10b981; /* Green-500 */
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-4xl">
+        <div class="bg-white shadow-2xl rounded-2xl p-6 sm:p-8">
+            <!-- Quiz Header -->
+            <div class="text-center border-b border-gray-200 pb-6 mb-6">
+                <h1 class="text-3xl sm:text-4xl font-bold text-gray-900">Sales & Marketing Quiz</h1>
+                <p class="mt-2 text-gray-600">Test your knowledge on sales funnel management and key metrics.</p>
+            </div>
+
+            <!-- Results Display Area -->
+            <div id="results-container" class="hidden sticky top-0 bg-white/80 backdrop-blur-sm z-10 p-4 rounded-lg shadow-md mb-6 text-center">
+                 <h2 id="score-text" class="text-2xl font-bold"></h2>
+                 <p id="score-message" class="text-gray-700 mt-1"></p>
+            </div>
+
+            <!-- Quiz Form -->
+            <form id="quiz-form">
+                <div id="quiz-questions" class="space-y-8">
+                    <!-- Questions will be dynamically inserted here -->
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="mt-10 pt-6 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <button type="submit" class="w-full sm:w-auto bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300 transition-all duration-300 transform hover:scale-105">
+                        Submit Answers
+                    </button>
+                    <button type="button" id="reset-btn" class="w-full sm:w-auto bg-gray-200 text-gray-700 font-bold py-3 px-8 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-4 focus:ring-gray-300 transition-all duration-300 hidden">
+                        Try Again
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // --- Data for the Quiz ---
+            const quizData = [
+                { question: "A marketing campaign generated 500 leads with a total budget of $2,500. Of these, 10% were identified as having no potential to convert. What is the '% Bad Leads' for this campaign?", options: ["5%", "10%", "20%", "50"], answer: "10%" },
+                { question: "A lead who initially scheduled a meeting asks to move the appointment to next week. Which status is most appropriate for this lead in the 'Meeting Booked' stage?", options: ["Reschedule on hold", "Meeting scheduled", "Reschedule", "No show"], answer: "Reschedule" },
+                { question: "During data entry, a new lead is found to have the same phone number as a contact already in the CRM. What status should be assigned to this new entry?", options: ["Bad lead", "Incorrect number", "New", "Duplicate"], answer: "Duplicate" },
+                { question: "If a sales team successfully completed 40 meetings and converted 10 of them into sales, what is the '% Conversion' rate?", options: ["20%", "25%", "40%", "10%"], answer: "25%" },
+                { question: "A company spent $5,000 on a marketing campaign that generated 1,000 leads. What is the Cost Per Lead (CPL)?", options: ["$5", "$10", "$50", "$2"], answer: "$5" },
+                { question: "After a meeting, a prospect says, 'I'm very interested, but I need to wait until the next quarter to make a decision.' Which status from the 'Meeting Done' stage fits best?", options: ["Waiting for feedback", "Not interested", "Interested in the future", "To be converted"], answer: "Interested in the future" },
+                { question: "What is the key difference between the 'no-show WA1/2/3' and 'Reschedule WA1/2/3' statuses?", options: ["One is for users who attended the meeting, and the other is for those who did not.", "One is for following up after a missed meeting, while the other is for arranging a new meeting time.", "There is no difference; they are used interchangeably.", "One is an automated message, and the other is a manual message."], answer: "One is for following up after a missed meeting, while the other is for arranging a new meeting time." },
+                { question: "Out of 100 total meetings booked, a sales representative personally scheduled 30 of them through their own follow-ups. What is the '% Manual Booking' rate?", options: ["30%", "70%", "100%", "30"], answer: "30%" },
+                { question: "What event marks the transition of a lead to the 'Sale' stage of the funnel?", options: ["The meeting is completed.", "The lead expresses interest.", "Payment is successfully received.", "The lead is marked as 'To be converted'."], answer: "Payment is successfully received." },
+                { question: "A prospect goes through the entire sales process, has a meeting, but ultimately decides not to purchase the specific program offered. Which status best describes this outcome?", options: ["Not interested", "Rejected", "Bad lead", "Offer rejected"], answer: "Offer rejected" },
+                { question: "What is the first stage of the sales funnel mentioned in the document?", options: ["Meeting Booked", "Lead", "Sale", "Consideration"], answer: "Lead" },
+                { question: "Which status indicates that a newly added potential customer has not yet been contacted?", options: ["Whatsapp text", "To be called", "New", "No reply"], answer: "New" },
+                { question: "If a user did not attend a scheduled meeting without giving prior notice, what would their status be?", options: ["Reschedule", "No show", "Blocked", "Waiting for Feedback (No show)"], answer: "No show" },
+                { question: "Which of the following statuses belongs to the 'Meeting Done' stage of the funnel?", options: ["Meeting scheduled", "Reschedule on hold", "Not interested", "Duplicate"], answer: "Not interested" },
+                { question: "What is the purpose of the '% Show Up' metric?", options: ["To measure the effectiveness of lead qualification.", "To measure the lead-to-meeting conversion rate.", "To measure the reliability of attendees for scheduled meetings.", "To evaluate the effectiveness of converting a meeting into a sale."], answer: "To measure the reliability of attendees for scheduled meetings." },
+                { question: "How is the 'CAC (Customer Acquisition Cost)' calculated?", options: ["Budget / Total Leads", "Revenue / Budget", "Budget / Total Sales", "Sales / Meetings Done"], answer: "Budget / Total Sales" },
+                { question: "According to the document, what does the 'Rejected' status in the 'Meeting Done' stage signify?", options: ["The user rejected the course/program offer.", "The lead progressed through the funnel but did not convert.", "The user has been blocked from interacting.", "The user did not attend the meeting and expressed disinterest."], answer: "The lead progressed through the funnel but did not convert." },
+                { question: "Which metric measures the overall efficiency of the entire sales funnel from start to finish?", options: ["% Conversion", "ROAS (Return on Ad Spend)", "CPL (Cost Per Lead)", "% End-To-End"], answer: "% End-To-End" },
+                { question: "What is the primary purpose of the 'Bad Lead' status?", options: ["The user has been blocked from interacting with us.", "The user has no potential of converting.", "The user provided an incorrect phone number.", "The user has not responded to outreach attempts."], answer: "The user has no potential of converting." },
+                { question: "If a user postpones scheduling a meeting to a later, unspecified time, which status should be used?", options: ["Reschedule", "Waiting for feedback", "Reschedule on hold", "Interested in the future"], answer: "Reschedule on hold" },
+                { question: "What does the 'ROAS' metric measure?", options: ["The cost to acquire a single lead.", "The total income generated from campaigns.", "The true cost to acquire a new customer.", "The profitability of marketing campaigns."], answer: "The profitability of marketing campaigns." },
+                { question: "A lead has completed a meeting and is ready for the sale but needs final confirmation. What is their status?", options: ["Sale", "To be converted", "Meeting done", "Waiting for feedback"], answer: "To be converted" },
+                { question: "What is the formula for calculating '% Booking'?", options: ["(Meetings Booked / Total Leads) x 100", "(Sales / Meetings Done) x 100", "(Meetings Done / Meetings Booked) x 100", "(Bad Leads / Total Leads) x 100"], answer: "(Meetings Booked / Total Leads) x 100" },
+                { question: "Which status is used when a user has been sent a second follow-up message via WhatsApp but hasn't replied?", options: ["Whatsapp text", "Whatsapp text 1", "Whatsapp text 2", "No reply"], answer: "Whatsapp text 2" },
+                { question: "What does 'CPBDone (Cost Per Meeting Done)' measure?", options: ["The cost for each scheduled meeting.", "The cost for each meeting that is completed.", "The cost to acquire a single lead.", "The total sales revenue."], answer: "The cost for each meeting that is completed." }
+            ];
+
+            const quizContainer = document.getElementById('quiz-questions');
+            const form = document.getElementById('quiz-form');
+            const resultsContainer = document.getElementById('results-container');
+            const scoreText = document.getElementById('score-text');
+            const scoreMessage = document.getElementById('score-message');
+            const resetBtn = document.getElementById('reset-btn');
+
+            // --- Function to build the quiz ---
+            function buildQuiz() {
+                quizContainer.innerHTML = ''; // Clear previous content
+                quizData.forEach((item, index) => {
+                    // Create question container
+                    const questionBlock = document.createElement('div');
+                    questionBlock.className = 'p-6 bg-gray-50 border border-gray-200 rounded-xl';
+                    questionBlock.id = `question-${index}`;
+
+                    // Create question text
+                    const questionText = document.createElement('p');
+                    questionText.className = 'text-lg font-semibold text-gray-800';
+                    questionText.textContent = `${index + 1}. ${item.question}`;
+                    questionBlock.appendChild(questionText);
+
+                    // Create options container
+                    const optionsContainer = document.createElement('div');
+                    optionsContainer.className = 'mt-4 space-y-3';
+                    
+                    // Create radio buttons for options
+                    item.options.forEach(option => {
+                        const label = document.createElement('label');
+                        label.className = 'quiz-option flex items-center p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:bg-gray-200 transition-colors duration-200';
+                        
+                        const radio = document.createElement('input');
+                        radio.type = 'radio';
+                        radio.name = `question${index}`;
+                        radio.value = option;
+                        radio.className = 'h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300';
+                        
+                        const optionText = document.createElement('span');
+                        optionText.className = 'ml-4 text-gray-700';
+                        optionText.textContent = option;
+                        
+                        label.appendChild(radio);
+                        label.appendChild(optionText);
+                        optionsContainer.appendChild(label);
+                    });
+
+                    questionBlock.appendChild(optionsContainer);
+                    const feedback = document.createElement('div');
+                    feedback.id = `feedback-${index}`;
+                    feedback.className = 'mt-3 text-sm';
+                    questionBlock.appendChild(feedback);
+
+                    quizContainer.appendChild(questionBlock);
+                });
+            }
+
+            // --- Function to show results ---
+            function showResults() {
+                let score = 0;
+                const totalQuestions = quizData.length;
+
+                quizData.forEach((item, index) => {
+                    const questionBlock = document.getElementById(`question-${index}`);
+                    const feedbackEl = document.getElementById(`feedback-${index}`);
+                    const selectedOption = form.elements[`question${index}`].value;
+                    const radios = form.elements[`question${index}`];
+
+                    // Disable all radio buttons after submission
+                    radios.forEach(radio => radio.disabled = true);
+                    
+                    const correct = selectedOption === item.answer;
+
+                    if (correct) {
+                        score++;
+                        // Find the selected label and mark it as correct
+                        radios.forEach(radio => {
+                            if(radio.checked) {
+                                radio.parentElement.classList.add('correct');
+                            }
+                        });
+                    } else {
+                        // Mark the incorrectly chosen answer and highlight the correct one
+                        radios.forEach(radio => {
+                             if(radio.checked) {
+                                radio.parentElement.classList.add('incorrect');
+                             }
+                             if(radio.value === item.answer) {
+                                 const correctLabel = radio.parentElement;
+                                 correctLabel.classList.add('correct');
+                                 feedbackEl.innerHTML = `The correct answer is: <span class="correct-answer-text">${item.answer}</span>`;
+                             }
+                        });
+                    }
+                });
+
+                // Display final score
+                resultsContainer.classList.remove('hidden');
+                scoreText.textContent = `You scored ${score} out of ${totalQuestions}!`;
+
+                let message = "Great effort!";
+                const percentage = (score / totalQuestions) * 100;
+                if (percentage === 100) message = "Perfect score! You're an expert!";
+                else if (percentage >= 80) message = "Excellent job! You really know your stuff.";
+                else if (percentage >= 60) message = "Good work! A solid understanding.";
+                else message = "Keep studying! You'll get there.";
+                scoreMessage.textContent = message;
+
+                // Show/hide buttons
+                document.querySelector('button[type="submit"]').classList.add('hidden');
+                resetBtn.classList.remove('hidden');
+
+                // Scroll to results
+                resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            // --- Event Listeners ---
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                showResults();
+            });
+
+            resetBtn.addEventListener('click', function() {
+                // Reset form state
+                buildQuiz(); // Rebuilds the quiz to clear selections and styles
+                resultsContainer.classList.add('hidden');
+                document.querySelector('button[type="submit"]').classList.remove('hidden');
+                resetBtn.classList.add('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+
+            // --- Initial Call ---
+            buildQuiz();
+        });
+    </script>
+
+</body>
+</html>
